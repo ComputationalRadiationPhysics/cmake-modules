@@ -18,8 +18,12 @@
 #
 # This module will define the following variables:
 #   mallocMC_INCLUDE_DIRS    - Include directories for the mallocMC headers.
-#   mallocMC_FOUND           - TRUE if FindMallocMC found a working install
+#   mallocMC_FOUND           - TRUE if FindmallocMC found a working install
 #   mallocMC_VERSION         - Version in format Major.Minor.Patch
+#   mallocMC_LIBRARIES       - mallocMC libraries for dynamic linking using
+#                              target_link_libraries(${mallocMC_LIBRARIES})
+#   mallocMC_DEFINITIONS     - Compiler definitions you should add with
+#                              add_definitions(${mallocMC_DEFINITIONS})
 #
 
 
@@ -41,66 +45,48 @@
 ###############################################################################
 
 
-###############################################################################
-# Required cmake version
-###############################################################################
-
+# Required cmake version ######################################################
+#
 cmake_minimum_required(VERSION 2.8.5)
 
 
-###############################################################################
-# mallocMC
-###############################################################################
-
-# we start by assuming we found mallocMC and falsify it if some
-# dependencies are missing (or if we did not find mallocMC at all)
+# mallocMC ####################################################################
+#
 set(mallocMC_FOUND TRUE)
 
 
-###############################################################################
-# preconditions
-###############################################################################
-
-if(NOT CUDA_FOUND)
-    set(mallocMC_FOUND FALSE)
-    message(STATUS "could not find CUDA, try something like find_package(CUDA REQUIRED)")
-elseif(CUDA_VERSION VERSION_LESS "5.0")
-    set(mallocMC_FOUND FALSE)
-    message(STATUS "CUDA found, but version too low (needs 5.0 or higher)")
-endif(NOT CUDA_FOUND)
-
-if(NOT Boost_FOUND)
-    set(mallocMC_FOUND FALSE)
-    message(STATUS "could not find Boost, try something like find_package(Boost REQUIRED)")
-elseif(Boost_VERSION LESS 104800)
-    set(mallocMC_FOUND FALSE)
-    message(STATUS "Boost found, but version too low (needs 1.48 or higher)")
-endif(NOT Boost_FOUND)
+# dependencies ################################################################
+#
+find_package(CUDA 5.0 REQUIRED)
+find_package(Boost 1.48.0 REQUIRED)
 
 
-# find mallocMC installation #################################################
+# find mallocMC installation ##################################################
 #
 find_path(mallocMC_ROOT_DIR
-  NAMES include/mallocMC/mallocMC.hpp
-  PATHS ENV MALLOCMC_ROOT
-  DOC "mallocMC ROOT location"
-)
+    NAMES include/mallocMC/mallocMC.hpp
+    PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdParty/mallocMC/" ENV MALLOCMC_ROOT
+    PATH_SUFFIXES "src"
+    DOC "mallocMC ROOT location"
+    )
 
 
 if(mallocMC_ROOT_DIR)
-    # mallocMC headers ##########################################################
+
+    # mallocMC variables ########################################################
     #
     list(APPEND mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include)
+    list(APPEND mallocMC_DEFINITIONS " ")
+    list(APPEND mallocMC_LIBRARIES " ")
 
-
-    # find version ############################################################
+    # find version ##############################################################
     #
     file(STRINGS "${mallocMC_ROOT_DIR}/include/mallocMC/version.hpp"
-         mallocMC_VERSION_MAJOR_HPP REGEX "#define MALLOCMC_VERSION_MAJOR ")
+        mallocMC_VERSION_MAJOR_HPP REGEX "#define MALLOCMC_VERSION_MAJOR ")
     file(STRINGS "${mallocMC_ROOT_DIR}/include/mallocMC/version.hpp"
-         mallocMC_VERSION_MINOR_HPP REGEX "#define MALLOCMC_VERSION_MINOR ")
+        mallocMC_VERSION_MINOR_HPP REGEX "#define MALLOCMC_VERSION_MINOR ")
     file(STRINGS "${mallocMC_ROOT_DIR}/include/mallocMC/version.hpp"
-         mallocMC_VERSION_PATCH_HPP REGEX "#define MALLOCMC_VERSION_PATCH ")
+        mallocMC_VERSION_PATCH_HPP REGEX "#define MALLOCMC_VERSION_PATCH ")
     string(REGEX MATCH "([0-9]+)" mallocMC_VERSION_MAJOR
                                 ${mallocMC_VERSION_MAJOR_HPP})
     string(REGEX MATCH "([0-9]+)" mallocMC_VERSION_MINOR
@@ -110,26 +96,59 @@ if(mallocMC_ROOT_DIR)
 
     set(mallocMC_VERSION "${mallocMC_VERSION_MAJOR}.${mallocMC_VERSION_MINOR}.${mallocMC_VERSION_PATCH}")
 
-else(mallocMC_ROOT_DIR)
-    set(mallocMC_FOUND FALSE)
-    message(STATUS "Can NOT find mallocMC - set MALLOCMC_ROOT")
+    foreach(COMPONENT ${mallocMC_FIND_COMPONENTS})
+        set(mallocMC_${COMPONENT}_FOUND TRUE)
+
+        if(${COMPONENT} STREQUAL "halloc")
+
+            # halloc linked library #################################################
+            #
+            find_library(${COMPONENT}_LIBRARY
+                NAMES libhalloc.a
+                PATHS "${mallocMC_ROOT_DIR}/../halloc/" ENV HALLOC_ROOT
+                PATH_SUFFIXES "lib" "bin"
+                )
+            if(${COMPONENT}_LIBRARY)
+                list(APPEND mallocMC_LIBRARIES ${${COMPONENT}_LIBRARY})
+            else(${COMPONENT}_LIBRARY)
+                if(mallocMC_FIND_REQUIRED OR NOT mallocMC_FIND_QUIETLY)
+                    message(WARNING "libhalloc.a not found. Ensure it is compiled correctly and set HALLOC_ROOT")
+                endif()
+                set(mallocMC_${COMPONENT}_FOUND FALSE)
+            endif(${COMPONENT}_LIBRARY)
+
+            # halloc headers ########################################################
+            #
+            find_path(${COMPONENT}_INCLUDE_DIR
+                NAMES halloc.h
+                PATHS "${mallocMC_ROOT_DIR}/../halloc/" ENV HALLOC_ROOT
+                PATH_SUFFIXES "include" "src"
+                )
+            if(${COMPONENT}_INCLUDE_DIR)
+                list(APPEND mallocMC_INCLUDE_DIRS ${${COMPONENT}_INCLUDE_DIR})
+            else(${COMPONENT}_INCLUDE_DIR)
+                set(mallocMC_${COMPONENT}_FOUND FALSE)
+            endif(${COMPONENT}_INCLUDE_DIR)
+
+            # set separable compilation #############################################
+            #
+            if(mallocMC_halloc_FOUND)
+                set(CUDA_SEPARABLE_COMPILATION ON PARENT_SCOPE)
+            endif(mallocMC_halloc_FOUND)
+
+        endif(${COMPONENT} STREQUAL "halloc")
+
+    endforeach(COMPONENT ${mallocMC_FIND_COMPONENTS})
+
 endif(mallocMC_ROOT_DIR)
 
 
-# unset checked variables if not found ########################################
+# handles the REQUIRED, QUIET and version-related arguments for find_package ##
 #
-if(NOT mallocMC_FOUND)
-    unset(mallocMC_INCLUDE_DIRS)
-endif(NOT mallocMC_FOUND)
-
-
-###############################################################################
-# FindPackage Options
-###############################################################################
-
-# handles the REQUIRED, QUIET and version-related arguments for find_package
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(mallocMC
-    REQUIRED_VARS mallocMC_INCLUDE_DIRS
+    FOUND_VAR mallocMC_FOUND
+    REQUIRED_VARS mallocMC_ROOT_DIR mallocMC_LIBRARIES mallocMC_INCLUDE_DIRS mallocMC_DEFINITIONS
     VERSION_VAR mallocMC_VERSION
-)
+    HANDLE_COMPONENTS
+    )
