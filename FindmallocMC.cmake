@@ -65,7 +65,7 @@ find_package(Boost 1.48.0 REQUIRED)
 #
 find_path(mallocMC_ROOT_DIR
     NAMES include/mallocMC/mallocMC.hpp
-    PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdParty/mallocMC/" ENV MALLOCMC_ROOT
+    PATHS ENV MALLOCMC_ROOT
     PATH_SUFFIXES "src"
     DOC "mallocMC ROOT location"
     )
