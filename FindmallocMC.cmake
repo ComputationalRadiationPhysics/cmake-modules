@@ -65,7 +65,7 @@ find_package(Boost 1.48.0 REQUIRED)
 #
 find_path(mallocMC_ROOT_DIR
     NAMES include/mallocMC/mallocMC.hpp
-    PATHS ENV MALLOCMC_ROOT
+    PATHS ${MALLOCMC_ROOT} ENV MALLOCMC_ROOT
     PATH_SUFFIXES "src"
     DOC "mallocMC ROOT location"
     )
