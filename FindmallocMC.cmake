@@ -22,6 +22,9 @@
 #   mallocMC_INCLUDE_DIRS    - Include directories for the mallocMC headers.
 #   mallocMC_FOUND           - TRUE if FindmallocMC found a working install
 #   mallocMC_VERSION         - Version in format Major.Minor.Patch
+#
+# The following variables are optional and only defined if the selected
+# components require them:
 #   mallocMC_LIBRARIES       - mallocMC libraries for dynamic linking using
 #                              target_link_libraries(${mallocMC_LIBRARIES})
 #   mallocMC_DEFINITIONS     - Compiler definitions you should add with
@@ -78,8 +81,8 @@ if(mallocMC_ROOT_DIR)
     # mallocMC variables ########################################################
     #
     list(APPEND mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include)
-    list(APPEND mallocMC_DEFINITIONS " ")
-    list(APPEND mallocMC_LIBRARIES " ")
+    list(APPEND mallocMC_DEFINITIONS "")
+    list(APPEND mallocMC_LIBRARIES "")
 
     # find version ##############################################################
     #
@@ -150,7 +153,7 @@ endif(mallocMC_ROOT_DIR)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(mallocMC
     FOUND_VAR mallocMC_FOUND
-    REQUIRED_VARS mallocMC_ROOT_DIR mallocMC_LIBRARIES mallocMC_INCLUDE_DIRS mallocMC_DEFINITIONS
+    REQUIRED_VARS mallocMC_ROOT_DIR mallocMC_INCLUDE_DIRS
     VERSION_VAR mallocMC_VERSION
     HANDLE_COMPONENTS
     )
