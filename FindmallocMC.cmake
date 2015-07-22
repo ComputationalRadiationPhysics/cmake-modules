@@ -22,6 +22,9 @@
 #   mallocMC_INCLUDE_DIRS    - Include directories for the mallocMC headers.
 #   mallocMC_FOUND           - TRUE if FindmallocMC found a working install
 #   mallocMC_VERSION         - Version in format Major.Minor.Patch
+#
+# The following variables are optional and only defined if the selected
+# components require them:
 #   mallocMC_LIBRARIES       - mallocMC libraries for dynamic linking using
 #                              target_link_libraries(${mallocMC_LIBRARIES})
 #   mallocMC_DEFINITIONS     - Compiler definitions you should add with
@@ -75,12 +78,6 @@ find_path(mallocMC_ROOT_DIR
 
 if(mallocMC_ROOT_DIR)
 
-    # mallocMC variables ########################################################
-    #
-    list(APPEND mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include)
-    list(APPEND mallocMC_DEFINITIONS " ")
-    list(APPEND mallocMC_LIBRARIES " ")
-
     # find version ##############################################################
     #
     file(STRINGS "${mallocMC_ROOT_DIR}/include/mallocMC/version.hpp"
@@ -96,8 +93,14 @@ if(mallocMC_ROOT_DIR)
     string(REGEX MATCH "([0-9]+)" mallocMC_VERSION_PATCH
                                 ${mallocMC_VERSION_PATCH_HPP})
 
+    # mallocMC variables ########################################################
+    #
+    set(mallocMC_REQUIRED_VARS_LIST mallocMC_ROOT_DIR mallocMC_INCLUDE_DIRS)
     set(mallocMC_VERSION "${mallocMC_VERSION_MAJOR}.${mallocMC_VERSION_MINOR}.${mallocMC_VERSION_PATCH}")
+    set(mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include)
 
+    # check additional components ###############################################
+    #
     foreach(COMPONENT ${mallocMC_FIND_COMPONENTS})
         set(mallocMC_${COMPONENT}_FOUND TRUE)
 
@@ -105,6 +108,7 @@ if(mallocMC_ROOT_DIR)
 
             # halloc linked library #################################################
             #
+            list(APPEND mallocMC_REQUIRED_VARS_LIST mallocMC_LIBRARIES)
             find_library(${COMPONENT}_LIBRARY
                 NAMES libhalloc.a
                 PATHS "${mallocMC_ROOT_DIR}/../halloc/" ENV HALLOC_ROOT
@@ -134,9 +138,9 @@ if(mallocMC_ROOT_DIR)
 
             # set separable compilation #############################################
             #
-            if(mallocMC_halloc_FOUND)
+            if(mallocMC_${COMPONENT}_FOUND)
                 set(CUDA_SEPARABLE_COMPILATION ON PARENT_SCOPE)
-            endif(mallocMC_halloc_FOUND)
+            endif(mallocMC_${COMPONENT}_FOUND)
 
         endif(${COMPONENT} STREQUAL "halloc")
 
@@ -147,10 +151,12 @@ endif(mallocMC_ROOT_DIR)
 
 # handles the REQUIRED, QUIET and version-related arguments for find_package ##
 #
+list(REMOVE_DUPLICATES mallocMC_REQUIRED_VARS_LIST)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(mallocMC
     FOUND_VAR mallocMC_FOUND
-    REQUIRED_VARS mallocMC_ROOT_DIR mallocMC_LIBRARIES mallocMC_INCLUDE_DIRS mallocMC_DEFINITIONS
+    REQUIRED_VARS ${mallocMC_REQUIRED_VARS_LIST}
     VERSION_VAR mallocMC_VERSION
     HANDLE_COMPONENTS
     )
+unset(mallocMC_REQUIRED_VARS_LIST)
