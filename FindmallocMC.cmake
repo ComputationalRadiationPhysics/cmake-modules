@@ -75,6 +75,7 @@ find_path(mallocMC_ROOT_DIR
     DOC "mallocMC ROOT location"
     )
 
+set(mallocMC_REQUIRED_VARS_LIST mallocMC_ROOT_DIR mallocMC_INCLUDE_DIRS)
 
 if(mallocMC_ROOT_DIR)
 
@@ -95,7 +96,6 @@ if(mallocMC_ROOT_DIR)
 
     # mallocMC variables ########################################################
     #
-    set(mallocMC_REQUIRED_VARS_LIST mallocMC_ROOT_DIR mallocMC_INCLUDE_DIRS)
     set(mallocMC_VERSION "${mallocMC_VERSION_MAJOR}.${mallocMC_VERSION_MINOR}.${mallocMC_VERSION_PATCH}")
     set(mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include)
 
