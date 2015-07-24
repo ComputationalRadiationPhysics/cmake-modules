@@ -13,7 +13,7 @@
 # To provide a hint to this module where to find the mallocMC installation,
 # set the MALLOCMC_ROOT environment variable. You can also set the
 # MALLOCMC_ROOT CMake variable, which will take precedence over the environment
-# variable.
+# variable. Boths hints are preferred over the DEFAULT_PATHS.
 #
 # This module requires CUDA and Boost. When calling it, make sure to call
 # find_package(CUDA) and find_package(Boost) first.
@@ -68,6 +68,13 @@ find_package(Boost 1.48.0 REQUIRED)
 
 # find mallocMC installation ##################################################
 #
+find_path(mallocMC_ROOT_DIR
+    NAMES include/mallocMC/mallocMC.hpp
+    PATHS ${MALLOCMC_ROOT} ENV MALLOCMC_ROOT
+    PATH_SUFFIXES "src"
+    DOC "mallocMC ROOT location"
+    NO_DEFAULT_PATH
+)
 find_path(mallocMC_ROOT_DIR
     NAMES include/mallocMC/mallocMC.hpp
     PATHS ${MALLOCMC_ROOT} ENV MALLOCMC_ROOT
