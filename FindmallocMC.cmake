@@ -102,13 +102,12 @@ if(mallocMC_ROOT_DIR)
     # mallocMC variables ########################################################
     #
     set(mallocMC_VERSION "${mallocMC_VERSION_MAJOR}.${mallocMC_VERSION_MINOR}.${mallocMC_VERSION_PATCH}")
-    set(mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include CACHE PATH "mallocMC include pathes")
+    set(mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include)
 
     # check additional components ###############################################
     #
     foreach(COMPONENT ${mallocMC_FIND_COMPONENTS})
-        set(mallocMC_${COMPONENT}_FOUND TRUE CACHE BOOL
-            "The mallocMC component ${COMPONENT} exists in the found installation.")
+        set(mallocMC_${COMPONENT}_FOUND TRUE)
 
         if(${COMPONENT} STREQUAL "halloc")
 
@@ -117,7 +116,13 @@ if(mallocMC_ROOT_DIR)
             list(APPEND mallocMC_REQUIRED_VARS_LIST mallocMC_LIBRARIES)
             find_library(mallocMC_${COMPONENT}_LIBRARY
                 NAMES libhalloc.a
-                PATHS "${mallocMC_ROOT_DIR}/../halloc/" ENV HALLOC_ROOT
+                PATHS ${HALLOC_ROOT} "${mallocMC_ROOT_DIR}/../halloc/" ENV HALLOC_ROOT
+                PATH_SUFFIXES "lib" "bin"
+                DOC "Libraries for the mallocMC component ${COMPONENT}."
+                NO_DEFAULT_PATH
+            )
+            find_library(mallocMC_${COMPONENT}_LIBRARY
+                NAMES libhalloc.a
                 PATH_SUFFIXES "lib" "bin"
                 DOC "Libraries for the mallocMC component ${COMPONENT}."
             )
@@ -127,14 +132,20 @@ if(mallocMC_ROOT_DIR)
                 if(mallocMC_FIND_REQUIRED OR NOT mallocMC_FIND_QUIETLY)
                     message(WARNING "libhalloc.a not found. Ensure it is compiled correctly and set HALLOC_ROOT")
                 endif()
-                unset(mallocMC_${COMPONENT}_FOUND CACHE)
+                unset(mallocMC_${COMPONENT}_FOUND)
             endif(mallocMC_${COMPONENT}_LIBRARY)
 
             # halloc headers ########################################################
             #
             find_path(mallocMC_${COMPONENT}_INCLUDE_DIR
                 NAMES halloc.h
-                PATHS "${mallocMC_ROOT_DIR}/../halloc/" ENV HALLOC_ROOT
+                PATHS ${HALLOC_ROOT} "${mallocMC_ROOT_DIR}/../halloc/" ENV HALLOC_ROOT
+                PATH_SUFFIXES "include" "src"
+                DOC "Includes for the mallocMC component ${COMPONENT}."
+                NO_DEFAULT_PATH
+            )
+            find_path(mallocMC_${COMPONENT}_INCLUDE_DIR
+                NAMES halloc.h
                 PATH_SUFFIXES "include" "src"
                 DOC "Includes for the mallocMC component ${COMPONENT}."
             )
@@ -171,25 +182,21 @@ find_package_handle_standard_args(mallocMC
 
 # clean up
 #
-# unset cached variables in case we did not found a valid install
+# unset cached variables in case we did not find a valid install
 # (e.g., we only found an outdated version)
 if(NOT mallocMC_FOUND)
     # default vars
-    unset(mallocMC_VERSION CACHE)
+    unset(mallocMC_VERSION)
     foreach(REQ_VAR ${mallocMC_REQUIRED_VARS_LIST})
+        unset(${REQ_VAR})
         unset(${REQ_VAR} CACHE)
     endforeach()
 
     # user-level component vars
     foreach(COMPONENT ${mallocMC_FIND_COMPONENTS})
-        # to do: expose to user in doc (header),
-        #        store in cache,
-        #        unset on NOT mallocMC_FOUND
-        if(mallocMC_${COMPONENT}_FOUND)
-            unset(mallocMC_${COMPONENT}_FOUND CACHE)
-            unset(mallocMC_${COMPONENT}_LIBRARY CACHE)
-            unset(mallocMC_${COMPONENT}_INCLUDE_DIR CACHE)
-        endif()
+        unset(mallocMC_${COMPONENT}_FOUND)
+        unset(mallocMC_${COMPONENT}_LIBRARY CACHE)
+        unset(mallocMC_${COMPONENT}_INCLUDE_DIR CACHE)
     endforeach()
 endif()
 
