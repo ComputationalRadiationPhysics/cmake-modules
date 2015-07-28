@@ -54,7 +54,7 @@
 
 # Required cmake version ######################################################
 #
-cmake_minimum_required(VERSION 2.8.5)
+cmake_minimum_required(VERSION 2.8.12.2)
 
 
 # dependencies ################################################################
