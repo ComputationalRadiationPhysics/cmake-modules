@@ -98,10 +98,17 @@ if(mallocMC_ROOT_DIR)
                                 ${mallocMC_VERSION_MINOR_HPP})
     string(REGEX MATCH "([0-9]+)" mallocMC_VERSION_PATCH
                                 ${mallocMC_VERSION_PATCH_HPP})
+    unset(mallocMC_VERSION_MAJOR_HPP)
+    unset(mallocMC_VERSION_MINOR_HPP)
+    unset(mallocMC_VERSION_PATCH_HPP)
 
     # mallocMC variables ########################################################
     #
     set(mallocMC_VERSION "${mallocMC_VERSION_MAJOR}.${mallocMC_VERSION_MINOR}.${mallocMC_VERSION_PATCH}")
+    unset(mallocMC_VERSION_MAJOR)
+    unset(mallocMC_VERSION_MINOR)
+    unset(mallocMC_VERSION_PATCH)
+
     set(mallocMC_INCLUDE_DIRS ${mallocMC_ROOT_DIR}/include)
 
     # check additional components ###############################################
