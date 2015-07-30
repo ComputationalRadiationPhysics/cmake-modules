@@ -19,11 +19,13 @@
 # find_package(CUDA) and find_package(Boost) first.
 #
 # This module will define the following variables:
-#   mallocMC_INCLUDE_DIRS    - Include directories for the mallocMC headers.
+#   mallocMC_INCLUDE_DIRS    - Include directories for the mallocMC headers
 #   mallocMC_FOUND           - TRUE if FindmallocMC found a working install
 #   mallocMC_VERSION         - Version in format Major.Minor.Patch
 # and for individual COMPONENTS:
-#   mallocMC_<COMPONENT>_FOUND  - TRUE if FindmallocMC found that component
+#   mallocMC_<COMPONENT>_FOUND  - TRUE if FindmallocMC found that component.
+#                                 The <COMPONENT> is written in original case,
+#                                 e.g., mallocMC_halloc_FOUND.
 #
 # The following variables are optional and only defined if the selected
 # components require them:
