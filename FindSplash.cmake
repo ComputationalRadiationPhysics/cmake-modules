@@ -194,7 +194,7 @@ if(Splash_ROOT_DIR)
 
 else(Splash_ROOT_DIR)
     set(Splash_FOUND FALSE)
-    message(STATUS "Can NOT find libSplash for HDF5 output - set SPLASH_ROOT")
+    message(STATUS "Can NOT find libSplash for HDF5 output - include its root in CMAKE_PREFIX_PATH")
 endif(Splash_ROOT_DIR)
 
 
