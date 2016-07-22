@@ -13,10 +13,10 @@
 #   )
 #
 # To provide a hint to this module where to find the Splash installation,
-# set the SPLASH_ROOT environment variable.
+# set CMAKE_PREFIX_PATH or the SPLASH_ROOT environment variable.
 #
 # This module requires HDF5. Make sure to provide a valid install of it
-# under the environment variable HDF5_ROOT.
+# via CMAKE_PREFIX_PATH or under the environment variable HDF5_ROOT.
 # Parallel HDF5/libSplash will require MPI (set the environment MPI_ROOT).
 #
 # Set the following CMake variables BEFORE calling find_packages to
