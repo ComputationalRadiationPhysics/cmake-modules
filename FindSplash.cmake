@@ -37,7 +37,7 @@
 
 
 ###############################################################################
-# Copyright 2014-2015 Axel Huebl, Felix Schmitt, Rene Widera
+# Copyright 2014-2016 Axel Huebl, Felix Schmitt, Rene Widera, Alexander Grund
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -70,6 +70,7 @@ set(Splash_FOUND TRUE)
 
 # find libSplash installation #################################################
 #
+
 find_path(Splash_ROOT_DIR
   NAMES include/splash/splash.h lib/libsplash.a
   PATHS ENV SPLASH_ROOT
@@ -96,7 +97,7 @@ if(Splash_ROOT_DIR)
     #
     find_library(Splash_LIBRARIES
       NAMES splash
-      PATHS $ENV{SPLASH_ROOT}/lib)
+      PATHS ${Splash_ROOT_DIR}/lib)
 
     # restore CMAKE_FIND_LIBRARY_SUFFIXES if manipulated by this module #######
     #
@@ -193,7 +194,7 @@ if(Splash_ROOT_DIR)
 
 else(Splash_ROOT_DIR)
     set(Splash_FOUND FALSE)
-    message(STATUS "Can NOT find libSplash for HDF5 output - set SPLASH_ROOT")
+    message(STATUS "Can NOT find libSplash for HDF5 output - include its root in CMAKE_PREFIX_PATH")
 endif(Splash_ROOT_DIR)
 
 
